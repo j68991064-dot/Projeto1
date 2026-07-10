@@ -1,11 +1,530 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <title>Meu Primeiro Site</title>
- <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo da Velha Pro Max</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --cell: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --x: #ff7b72;
+      --o: #79c0ff;
+      --win: #3fb950;
+      --accent: #58a6ff;
+    }
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --cell: #f6f8fa;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --x: #cf222e;
+      --o: #0969da;
+      --win: #1a7f37;
+      
+      
+      --accent: #0969da;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+    body {
+      background-image:url('j.jpg');
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content:center;
+      min-height: 100vh;
+      padding: 20px 10px;
+      transition: 0.2s;
+    }
+  
+    h1 { color: var(--accent); margin-bottom: 15px; }
+  
+ .top-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  
+ .top-bar button,.top-bar input {
+      background: var(--cell);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+  
+ .top-bar input {
+      width: 100px;
+      text-align: center;
+    }
+  
+    #placar {
+      display: flex;
+      gap: 25px;
+      font-size: 18px;
+      margin-bottom: 15px;
+      background: var(--cell);
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+  
+    #placar span { font-weight: bold; }
+    #controles, #tamanho {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  
+    #controles button, #tamanho button {
+      background: #21262d;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  
+    [data-theme="light"] #controles button, [data-theme="light"] #tamanho button {
+      background: #f6f8fa;
+    }
+  
+    #controles button.ativo, #tamanho button.ativo {
+      background: #1f6feb;
+      border-color: #1f6feb;
+      font-weight: bold;
+      color: white;00
+    }
+  
+    #status {
+      font-size: 20px;
+      margin: 15px 0;
+      height: 25px;
+      font-weight: 600;
+    }
+  
+    #board {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+  
+ .cell {
+      background: var(--cell);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.15s;
+      user-select: none;
+    }
+  
+ .cell:hover {
+      border-color: var(--accent);
+      transform: scale(1.03);
+    }
+ .cell.x { color: var(--x); }
+ .cell.o { color: var(--o); }
+ .cell.vencedora {
+      background: var(--win);
+      border-color: var(--win);
+      color: #0d1117;
+      animation: pisca 0.3s 3;
+    }
+    
+  [data-theme="light"].cell.vencedora {
+      color: white;
+    }
+  
+    @keyframes pisca {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+  
+    #botoes-acao {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  
+    #botoes-acao button {
+      padding: 10px 20px;
+      font-size: 15px;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  
+    #reset { background: #238636; }
+    #desfazer { background: #9a6700; }
+    #zerar { background: #da3633; }
+    #som, #tema { background: #6e7681; }
+  
+  </style>
 </head>
 <body>
-  <h1>Ola Terminal!</h1>
-  <p>Eu criei isso pelo terminal 😎</p>
+  <h1>Jogo da Velha Pro Max</h1>
+
+  <div class="top-bar">
+    <input id="nomeX" placeholder="Jogador X" value="X" maxlength="10">
+    <input id="nomeO" placeholder="Jogador O" value="O" maxlength="10">
+    <button id="tema" onclick="toggleTema()">🌙 Tema</button>
+  </div>
+
+  <div id="placar">
+    <div><span id="labelX">X</span>: <span id="scoreX">0</span></div>
+    <div>Empates: <span id="scoreVelha">0</span></div>
+    <div><span id="labelO">O</span>: <span id="scoreO">0</span></div>
+  </div>
+
+  <div id="tamanho">
+    <button id="t3" class="ativo" onclick="setTamanho(3)">3x3</button>
+    <button id="t4" onclick="setTamanho(4)">4x4</button>
+    <button id="t5" onclick="setTamanho(5)">5x5</button>
+  </div>
+
+  <div id="controles">
+    <button id="pvp" class="ativo" onclick="setModo('pvp')">2 Jogadores</button>
+    <button id="pvb" onclick="setModo('pvb')">Vs PC Fácil</button>
+    <button id="pvb-dificil" onclick="setModo('pvb-dificil')">Vs PC Difícil</button>
+  </div>
+
+  <div id="status">Vez do X</div>
+  <div id="board"></div>
+
+  <div id="botoes-acao">
+    <button id="reset" onclick="resetRodada()">Nova Rodada</button>
+    <button id="desfazer" onclick="desfazerJogada()">Desfazer</button>
+    <button id="zerar" onclick="zerarPlacar()">Zerar Placar</button>
+  </div>
+
+  <script>
+    const board = document.getElementById('board');
+    const status = document.getElementById('status');
+    const scoreX = document.getElementById('scoreX');
+    const scoreO = document.getElementById('scoreO');
+    const scoreVelha = document.getElementById('scoreVelha');
+    const labelX = document.getElementById('labelX');
+    const labelO = document.getElementById('labelO');
+    const nomeX = document.getElementById('nomeX');
+    const nomeO = document.getElementById('nomeO');
+
+    let tamanho = 3;
+    let cells = Array(9).fill('');
+    let currentPlayer = 'X';
+    let gameActive = true;
+    let modo = 'pvp';
+    let placar = { X: 0, O: 0, Velha: 0 };
+    let historico = [];
+    let sequenciaVitoria = 3;
+    let pcPensando = false;
+
+    function toggleTema() {
+      const atual = document.body.getAttribute('data-theme');
+      if (atual === 'light') {
+        document.body.removeAttribute('data-theme');
+        document.getElementById('tema').textContent = '🌙 Tema';
+      } else {
+        document.body.setAttribute('data-theme', 'light');
+        document.getElementById('tema').textContent = '☀️ Tema';
+      }
+    }
+
+    nomeX.oninput = nomeO.oninput = atualizarLabels;
+    function atualizarLabels() {
+      labelX.textContent = nomeX.value || 'X';
+      labelO.textContent = nomeO.value || 'O';
+      atualizarStatus();
+    }
+
+    function setTamanho(n) {
+      tamanho = n;
+      sequenciaVitoria = n === 3? 3 : 4;
+      document.querySelectorAll('#tamanho button').forEach(btn => btn.classList.remove('ativo'));
+      document.getElementById('t' + n).classList.add('ativo');
+      resetRodada();
+    }
+
+    function gerarWinConditions() {
+      const conditions = [];
+      const size = tamanho;
+      const win = sequenciaVitoria;
+
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j <= size - win; j++) {
+          const linha = [];
+          for (let k = 0; k < win; k++) linha.push(i * size + j + k);
+          conditions.push(linha);
+        }
+      }
+
+      for (let j = 0; j < size; j++) {
+        for (let i = 0; i <= size - win; i++) {
+          const coluna = [];
+          for (let k = 0; k < win; k++) coluna.push((i + k) * size + j);
+          conditions.push(coluna);
+        }
+      }
+
+      for (let i = 0; i <= size - win; i++) {
+        for (let j = 0; j <= size - win; j++) {
+          const diag1 = [];
+          for (let k = 0; k < win; k++) diag1.push((i + k) * size + j + k);
+          conditions.push(diag1);
+        }
+      }
+
+      for (let i = 0; i <= size - win; i++) {
+        for (let j = win - 1; j < size; j++) {
+          const diag2 = [];
+          for (let k = 0; k < win; k++) diag2.push((i + k) * size + j - k);
+          conditions.push(diag2);
+        }
+      }
+
+      return conditions;
+    }
+
+    function renderBoard(vencedora = null) {
+      board.innerHTML = '';
+      board.style.gridTemplateColumns = `repeat(${tamanho}, ${80 - tamanho * 5}px)`;
+      board.style.gridTemplateRows = `repeat(${tamanho}, ${80 - tamanho * 5}px)`;
+
+      cells.forEach((val, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.style.fontSize = `${40 - tamanho * 4}px`;
+        if(val) cell.classList.add(val.toLowerCase());
+        if(vencedora && vencedora.includes(idx)) cell.classList.add('vencedora');
+        cell.textContent = val;
+        cell.onclick = () => makeMove(idx);
+        board.appendChild(cell);
+      });
+    }
+
+    function setModo(novoModo) {
+      modo = novoModo;
+      document.querySelectorAll('#controles button').forEach(btn => btn.classList.remove('ativo'));
+      document.getElementById(novoModo).classList.add('ativo');
+      if (novoModo!== 'pvp') nomeO.value = 'PC';
+      atualizarLabels();
+      resetRodada();
+    }
+
+    function makeMove(index, ehPC = false) {
+      if (cells[index] ||!gameActive || pcPensando) return;
+      if ((modo === 'pvb' || modo === 'pvb-dificil') && currentPlayer === 'O' &&!ehPC) return;
+
+      historico.push([...cells]);
+      cells[index] = currentPlayer;
+      renderBoard();
+
+      const linhaVencedora = checkWinner();
+      if (linhaVencedora) {
+        status.textContent = `${getNomeAtual()} venceu!`;
+        placar[currentPlayer]++;
+        gameActive = false;
+        renderBoard(linhaVencedora);
+        atualizarPlacar();
+        return;
+      }
+
+      if (!cells.includes('')) {
+        status.textContent = 'Deu velha!';
+        placar.Velha++;
+        gameActive = false;
+        atualizarPlacar();
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X'? 'O' : 'X';
+      atualizarStatus();
+      renderBoard();
+      
+      // Força o PC a jogar sem setTimeout
+      if ((modo === 'pvb' || modo === 'pvb-dificil') && currentPlayer === 'O' && gameActive) {
+        pcPensando = true;
+        jogadaPC();
+        pcPensando = false;
+      }
+    }
+
+    function getNomeAtual() {
+      return currentPlayer === 'X'? (nomeX.value || 'X') : (nomeO.value || 'O');
+    }
+
+    function atualizarStatus() {
+      if (gameActive) status.textContent = `Vez do ${getNomeAtual()}`;
+    }
+
+    function desfazerJogada() {
+      if (historico.length === 0 ||!gameActive) return;
+      cells = historico.pop();
+      if ((modo === 'pvb' || modo === 'pvb-dificil') && historico.length % 2 === 1) {
+        cells = historico.pop();
+      }
+      currentPlayer = 'X';
+      atualizarStatus();
+      renderBoard();
+    }
+
+    function jogadaPC() {
+      if (!gameActive) return;
+      let jogada = -1;
+
+      if (modo === 'pvb-dificil' && tamanho === 3) {
+        jogada = melhorJogadaMinimax();
+      } else {
+        const winConditions = gerarWinConditions();
+        for (let cond of winConditions) {
+          const valores = cond.map(i => cells[i]);
+          if (valores.filter(v => v === 'O').length === sequenciaVitoria - 1 && valores.includes('')) {
+            jogada = cond[valores.indexOf('')];
+            break;
+          }
+        }
+        if (jogada === -1) {
+          for (let cond of winConditions) {
+            const valores = cond.map(i => cells[i]);
+            if (valores.filter(v => v === 'X').length === sequenciaVitoria - 1 && valores.includes('')) {
+              jogada = cond[valores.indexOf('')];
+              break;
+            }
+          }
+        }
+        if (jogada === -1 && tamanho === 3 && cells[4] === '') jogada = 4;
+        if (jogada === -1) {
+          const livres = cells.map((v,i) => v === ''? i : null).filter(v => v!== null);
+          jogada = livres[Math.floor(Math.random() * livres.length)];
+        }
+      }
+      makeMove(jogada, true);
+    }
+
+    function melhorJogadaMinimax() {
+      let melhorScore = -Infinity;
+      let melhorJogada = -1;
+      const winConditions = gerarWinConditions();
+
+      for (let i = 0; i < cells.length; i++) {
+        if (cells[i] === '') {
+          cells[i] = 'O';
+          let score = minimax(cells, 0, false, winConditions);
+          cells[i] = '';
+          if (score > melhorScore) {
+            melhorScore = score;
+            melhorJogada = i;
+          }
+        }
+      }
+      return melhorJogada;
+    }
+
+    function minimax(novoBoard, profundidade, isMax, winConditions) {
+      const vencedor = checarVencedorMinimax(novoBoard, winConditions);
+      if (vencedor === 'O') return 10 - profundidade;
+      if (vencedor === 'X') return profundidade - 10;
+      if (!novoBoard.includes('')) return 0;
+
+      if (isMax) {
+        let melhorScore = -Infinity;
+        for (let i = 0; i < novoBoard.length; i++) {
+          if (novoBoard[i] === '') {
+            novoBoard[i] = 'O';
+            let score = minimax(novoBoard, profundidade + 1, false, winConditions);
+            novoBoard[i] = '';
+            melhorScore = Math.max(score, melhorScore);
+          }
+        }
+        return melhorScore;
+      } else {
+        let melhorScore = Infinity;
+        for (let i = 0; i < novoBoard.length; i++) {
+          if (novoBoard[i] === '') {
+            novoBoard[i] = 'X';
+            let score = minimax(novoBoard, profundidade + 1, true, winConditions);
+            novoBoard[i] = '';
+            melhorScore = Math.min(score, melhorScore);
+          }
+        }
+        return melhorScore;
+      }
+    }
+
+    function checarVencedorMinimax(board, winConditions) {
+      for (let condition of winConditions) {
+        const primeiro = board[condition[0]];
+        if (primeiro && condition.every(i => board[i] === primeiro)) {
+          return primeiro;
+        }
+      }
+      return null;
+    }
+
+    function checkWinner() {
+      const winConditions = gerarWinConditions();
+      for (let condition of winConditions) {
+        const primeiro = cells[condition[0]];
+        if (primeiro && condition.every(i => cells[i] === primeiro)) {
+          return condition;
+        }
+      }
+      return null;
+    }
+
+    function atualizarPlacar() {
+      scoreX.textContent = placar.X;
+      scoreO.textContent = placar.O;
+      scoreVelha.textContent = placar.Velha;
+    }
+
+    function resetRodada() {
+      cells = Array(tamanho * tamanho).fill('');
+      currentPlayer = 'X';
+      gameActive = true;
+      historico = [];
+      pcPensando = false;
+      atualizarStatus();
+      renderBoard();
+      
+      // Se for modo PC e o PC for O, força ele a jogar se X começar
+      if ((modo === 'pvb' || modo === 'pvb-dificil') && currentPlayer === 'O') {
+        pcPensando = true;
+        jogadaPC();
+        pcPensando = false;
+      }
+    }
+
+    function zerarPlacar() {
+      placar = { X: 0, O: 0, Velha: 0 };
+      atualizarPlacar();
+      resetRodada();
+    }
+
+    atualizarLabels();
+    renderBoard();
+    if ((modo === 'pvb' || modo === 'pvb-dificil') && currentPlayer === 'O') {
+      pcPensando = true;
+      jogadaPC();
+      pcPensando = false;
+    }
+  </script>
 </body>
 </html>
