@@ -1,101 +1,552 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jogo da Velha Pro Max</title>
-<style>
-:root{--bg:#0d1117;--cell:#161b22;--border:#30363d;--text:#c9d1d9;--x:#ff7b72;--o:#79c0ff;--win:#3fb950;--accent:#58a6ff}
-[data-theme="light"]{--bg:#fff;--cell:#f6f8fa;--border:#d0d7de;--text:#1f2328;--x:#cf222e;--o:#0969da;--win:#1a7f37;--accent:#0969da}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background-image:url('j.jpg');background-color:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px 10px;transition:.2s}
-h1{color:var(--accent);margin-bottom:5px}.titulo{color:var(--accent)}
-.theme-buttons{margin:10px 0}.theme-buttons button{padding:8px 15px;margin:5px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;background:var(--cell);color:var(--text);border:1px solid var(--border)}
-body.tema-escuro{background:linear-gradient(135deg,#0f0f1e,#1a1a2e)}body.tema-escuro.cell{background:#0f3460;color:#fff}body.tema-escuro.cell:hover{background:#1a4d8f}
-body.tema-neon{background:linear-gradient(135deg,#000,#120136)}body.tema-neon.cell{background:#2d004d;color:#00ffea;border-color:#ff00ff}body.tema-neon.cell:hover{background:#ff00ff;color:#000}
-.top-bar{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;justify-content:center}
-.top-bar button,.top-bar input{background:var(--cell);color:var(--text);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:14px}
-.top-bar input{width:100px;text-align:center}
-#placar{display:flex;gap:25px;font-size:18px;margin-bottom:15px;background:var(--cell);padding:10px 20px;border-radius:8px;border:1px solid var(--border)}
-#placar span{font-weight:bold}#controles,#tamanho{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;justify-content:center}
-#controles button,#tamanho button{background:#21262d;color:var(--text);border:1px solid var(--border);padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px}
-[data-theme="light"] #controles button,[data-theme="light"] #tamanho button{background:#f6f8fa}
-#controles button.ativo,#tamanho button.ativo{background:#1f6feb;border-color:#1f6feb;font-weight:bold;color:white}
-#status{font-size:20px;margin:15px 0;height:25px;font-weight:600}
-#board{display:grid;gap:8px;margin-bottom:20px}
-.cell{background:var(--cell);border:2px solid var(--border);border-radius:12px;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;user-select:none}
-.cell:hover{border-color:var(--accent);transform:scale(1.03)}
-.cell.x{color:var(--x)}.cell.o{color:var(--o)}
-.cell.vencedora{background:var(--win);border-color:var(--win);color:#0d1117;animation:pisca.3s 3}
-[data-theme="light"].cell.vencedora{color:white}
-@keyframes pisca{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-#botoes-acao{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-#botoes-acao button{padding:10px 20px;font-size:15px;border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:600}
-#reset{background:#238636}#desfazer{background:#9a6700}#zerar{background:#da3633}#som,#tema{background:#6e7681}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha Pro Max</title>
+    <style>
+        /* Sistema de Temas */
+        :root, [data-theme="dark"] {
+            --bg: linear-gradient(135deg, #0f0f1e, #1a1a2e);
+            --cell: #161b22;
+            --cell-hover: #1f2631;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --x: #ff7b72;
+            --o: #79c0ff;
+            --win: #3fb950;
+            --accent: #58a6ff;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --footer-bg: rgba(22, 27, 34, 0.8);
+        }
+        [data-theme="light"] {
+            --bg: linear-gradient(135deg, #f6f8fa, #e1e4e8);
+            --cell: #ffffff;
+            --cell-hover: #f3f4f6;
+            --border: #d0d7de;
+            --text: #1f2328;
+            --x: #cf222e;
+            --o: #0969da;
+            --win: #1a7f37;
+            --accent: #0969da;
+            --shadow: rgba(0, 0, 0, 0.05);
+            --footer-bg: rgba(255, 255, 255, 0.8);
+        }
+        [data-theme="neon"] {
+            --bg: linear-gradient(135deg, #000000, #120136);
+            --cell: #2d004d;
+            --cell-hover: #40006b;
+            --border: #ff00ff;
+            --text: #00ffea;
+            --x: #ff007f;
+            --o: #00ffea;
+            --win: #00ff66;
+            --accent: #00ffea;
+            --shadow: rgba(255, 0, 255, 0.2);
+            --footer-bg: rgba(45, 0, 77, 0.8);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px 10px 90px 10px;
+        }
+
+        h1 { color: var(--accent); margin-bottom: 20px; text-align: center; font-size: 24px; }
+
+        .top-bar, .controles-container, .inputs-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .input-grupo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .input-grupo label { font-size: 11px; text-transform: uppercase; opacity: 0.7; }
+
+        button, input {
+            background: var(--cell);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        input { cursor: text; width: 110px; text-align: center; }
+        input.simbolo-input { width: 50px; }
+        button:hover { background: var(--cell-hover); }
+        button.ativo { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        #placar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #placar {
+            display: flex;
+            gap: 25px;
+            font-size: 16px;
+            background: var(--cell);
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        #placar span { font-weight: bold; }
+
+        #cronometro {
+            font-size: 14px;
+            background: rgba(218, 54, 51, 0.1);
+            color: #ff7b72;
+            border: 1px solid rgba(218, 54, 51, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        #status { font-size: 20px; margin: 10px 0 15px 0; height: 25px; font-weight: 600; text-align: center; }
+        
+        #board { 
+            display: grid; 
+            gap: 8px; 
+            margin: 0 auto 20px auto; 
+            background: rgba(255, 255, 255, 0.05); 
+            padding: 10px; 
+            border-radius: 16px;
+            width: 90vw;
+            max-width: 320px;
+        }
+        
+        .cell-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+        }
+
+        .cell {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--cell);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.05);
+        }
+        
+        .cell.x { color: var(--x); }
+        .cell.o { color: var(--o); }
+        
+        .cell.vencedora {
+            background: var(--win) !important;
+            border-color: var(--win) !important;
+            color: #fff !important;
+        }
+
+        #botoes-acao { display: flex; gap: 10px; margin-bottom: 20px; }
+        #botoes-acao button { color: #fff; }
+        #reset { background: #238636; border: none; }
+        #desfazer { background: #9a6700; border: none; }
+        #zerar { background: #da3633; border: none; }
+
+        footer {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: var(--footer-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            padding: 12px;
+            text-align: center;
+            font-size: 13px;
+            z-index: 1000;
+        }
+        footer i { color: var(--accent); font-weight: bold; font-style: normal; }
+    </style>
 </head>
 <body>
+
 <h1>Jogo da Velha Pro Max</h1>
-<p class="titulo" style="font-size:14px;opacity:.8">Feito por: <i>Johny Sniper👑</i></p>
-<div class="theme-buttons">
-<button onclick="setTema('')">Padrão</button>
-<button onclick="setTema('tema-escuro')">Escuro</button>
-<button onclick="setTema('tema-neon')">Neon</button>
-</div>
+
 <div class="top-bar">
-<input id="nomeX" placeholder="Jogador X" value="X" maxlength="10">
-<input id="nomeO" placeholder="Jogador O" value="O" maxlength="10">
-<button id="tema" onclick="toggleTema()">🌙 Tema</button>
+    <button onclick="setTema('light')">☀️ Claro</button>
+    <button onclick="setTema('dark')">🌙 Escuro</button>
+    <button onclick="setTema('neon')">🔮 Neon</button>
 </div>
-<div id="placar">
-<div><span id="labelX">X</span>: <span id="scoreX">0</span></div>
-<div>Empates: <span id="scoreVelha">0</span></div>
-<div><span id="labelO">O</span>: <span id="scoreO">0</span></div>
+ 
+<div class="inputs-container">
+    <div class="input-grupo">
+        <label>Jogador 1</label>
+        <div style="display:flex; gap:2px;">
+            <input id="nomeX" placeholder="Nome" value="X" maxlength="10">
+            <input id="simbX" class="simbolo-input" placeholder="Símb." value="X" maxlength="2">
+        </div>
+    </div>
+    <div class="input-grupo">
+        <label>Jogador 2</label>
+        <div style="display:flex; gap:2px;">
+            <input id="nomeO" placeholder="Nome" value="O" maxlength="10">
+            <input id="simbO" class="simbolo-input" placeholder="Símb." value="O" maxlength="2">
+        </div>
+    </div>
 </div>
-<div id="tamanho">
-<button id="t3" class="ativo" onclick="setTamanho(3)">3x3</button>
-<button id="t4" onclick="setTamanho(4)">4x4</button>
-<button id="t5" onclick="setTamanho(5)">5x5</button>
+ 
+<div id="placar-wrapper">
+    <div id="placar">
+        <div><span id="labelX">X</span>: <span id="scoreX">0</span></div>
+        <div>Velha: <span id="scoreVelha">0</span></div>
+        <div><span id="labelO">O</span>: <span id="scoreO">0</span></div>
+    </div>
+    <div id="cronometro">Tempo da Rodada: <span id="tempo">0s</span></div>
 </div>
-<div id="controles">
-<button id="pvp" class="ativo" onclick="setModo('pvp')">2 Jogadores</button>
-<button id="pvb" onclick="setModo('pvb')">Vs PC Fácil</button>
-<button id="pvb-dificil" onclick="setModo('pvb-dificil')">Vs PC Difícil</button>
+ 
+<div class="controles-container" id="tamanho">
+    <button id="t3" class="ativo" onclick="setTamanho(3)">3x3</button>
+    <button id="t4" onclick="setTamanho(4)">4x4</button>
+    <button id="t5" onclick="setTamanho(5)">5x5</button>
 </div>
+
+<div class="controles-container" id="controles">
+    <button id="pvp" class="ativo" onclick="setModo('pvp')">2 Jogadores</button>
+    <button id="pvb" onclick="setModo('pvb')">Vs PC Fácil</button>
+    <button id="pvb-medio" onclick="setModo('pvb-medio')">Vs PC Médio</button>
+    <button id="pvb-dificil" onclick="setModo('pvb-dificil')">Vs PC Difícil</button>
+</div>
+
 <div id="status">Vez do X</div>
 <div id="board"></div>
+
 <div id="botoes-acao">
-<button id="reset" onclick="resetRodada()">Nova Rodada</button>
-<button id="desfazer" onclick="desfazerJogada()">Desfazer</button>
-<button id="zerar" onclick="zerarPlacar()">Zerar Placar</button>
+    <button id="reset" onclick="resetRodada()">Nova Rodada</button>
+    <button id="desfazer" onclick="desfazerJogada()">Desfazer</button>
+    <button id="zerar" onclick="zerarPlacar()">Zerar Placar</button>
 </div>
+
+<footer>
+    <span>Desenvolvido ❤️ por <i>Johny Sniper 👑</i></span>
+</footer>
+  
 <script>
-const audioContext=new(window.AudioContext||window.webkitAudioContext)();
-function tocarSom(t){const o=audioContext.createOscillator(),g=audioContext.createGain();o.connect(g);g.connect(audioContext.destination);if(t==='clique'){o.frequency.value=600;g.gain.value=.1}if(t==='vitoria'){o.frequency.value=800;g.gain.value=.2}if(t==='empate'){o.frequency.value=400;g.gain.value=.2}o.start();o.stop(audioContext.currentTime+.1)}
-document.addEventListener('click',()=>audioContext.resume(),{once:true});
-const board=document.getElementById('board'),status=document.getElementById('status'),scoreX=document.getElementById('scoreX'),scoreO=document.getElementById('scoreO'),scoreVelha=document.getElementById('scoreVelha'),labelX=document.getElementById('labelX'),labelO=document.getElementById('labelO'),nomeX=document.getElementById('nomeX'),nomeO=document.getElementById('nomeO');
-let tamanho=3,cells=Array(9).fill(''),currentPlayer='X',gameActive=true,modo='pvp',placar={X:0,O:0,Velha:0},historico=[],sequenciaVitoria=3,pcPensando=false;
-function setTema(t){document.body.className=t}
-function toggleTema(){const a=document.body.getAttribute('data-theme');if(a==='light'){document.body.removeAttribute('data-theme');document.getElementById('tema').textContent='🌙 Tema'}else{document.body.setAttribute('data-theme','light');document.getElementById('tema').textContent='☀️ Tema'}}
-nomeX.oninput=nomeO.oninput=atualizarLabels;
-function atualizarLabels(){labelX.textContent=nomeX.value||'X';labelO.textContent=nomeO.value||'O';atualizarStatus()}
-function setTamanho(n){tamanho=n;sequenciaVitoria=n===3?3:4;cells=Array(n*n).fill('');document.querySelectorAll('#tamanho button').forEach(b=>b.classList.remove('ativo'));document.getElementById('t'+n).classList.add('ativo');resetRodada()}
-function gerarWinConditions(){const c=[],s=tamanho,w=sequenciaVitoria;for(let i=0;i<s;i++)for(let j=0;j<=s-w;j++){const l=[];for(let k=0;k<w;k++)l.push(i*s+j+k);c.push(l)}for(let j=0;j<s;j++)for(let i=0;i<=s-w;i++){const l=[];for(let k=0;k<w;k++)l.push((i+k)*s+j);c.push(l)}for(let i=0;i<=s-w;i++)for(let j=0;j<=s-w;j++){const l=[];for(let k=0;k<w;k++)l.push((i+k)*s+j+k);c.push(l)}for(let i=0;i<=s-w;i++)for(let j=w-1;j<s;j++){const l=[];for(let k=0;k<w;k++)l.push((i+k)*s+j-k);c.push(l)}return c}
-function renderBoard(v=null){board.innerHTML='';board.style.gridTemplateColumns=`repeat(${tamanho},${80-tamanho*5}px)`;board.style.gridTemplateRows=`repeat(${tamanho},${80-tamanho*5}px)`;cells.forEach((val,i)=>{const d=document.createElement('div');d.className='cell';d.style.fontSize=`${40-tamanho*4}px`;if(val)d.classList.add(val.toLowerCase());if(v&&v.includes(i))d.classList.add('vencedora');d.textContent=val;d.onclick=()=>makeMove(i);board.appendChild(d)})}
-function setModo(m){modo=m;document.querySelectorAll('#controles button').forEach(b=>b.classList.remove('ativo'));document.getElementById(m).classList.add('ativo');if(m!=='pvp')nomeO.value='PC';atualizarLabels();resetRodada()}
-function makeMove(i,pc=false){if(cells[i]||!gameActive||pcPensando)return;if((modo==='pvb'||modo==='pvb-dificil')&&currentPlayer==='O'&&!pc)return;historico.push([...cells]);cells[i]=currentPlayer;tocarSom('clique');renderBoard();const v=checkWinner();if(v){status.textContent=`${getNomeAtual()} venceu!`;tocarSom('vitoria');placar[currentPlayer]++;gameActive=false;renderBoard(v);atualizarPlacar();return}if(!cells.includes('')){status.textContent='Deu velha!';tocarSom('empate');placar.Velha++;gameActive=false;atualizarPlacar();return}currentPlayer=currentPlayer==='X'?'O':'X';atualizarStatus();renderBoard();if((modo==='pvb'||modo==='pvb-dificil')&&currentPlayer==='O'&&gameActive){pcPensando=true;setTimeout(()=>{jogadaPC();pcPensando=false},600)}}
-function getNomeAtual(){return currentPlayer==='X'?(nomeX.value||'X'):(nomeO.value||'O')}
-function atualizarStatus(){if(gameActive)status.textContent=`Vez do ${getNomeAtual()}`}
-function desfazerJogada(){if(historico.length===0||!gameActive)return;cells=historico.pop();if((modo==='pvb'||modo==='pvb-dificil')&&historico.length%2===1)cells=historico.pop();currentPlayer='X';atualizarStatus();renderBoard()}
-function jogadaPC(){if(!gameActive)return;let j=-1;if(modo==='pvb-dificil'&&tamanho===3)j=melhorJogadaMinimax();else{const w=gerarWinConditions();for(let c of w){const v=c.map(i=>cells[i]);if(v.filter(x=>x==='O').length===sequenciaVitoria-1&&v.includes('')){j=c[v.indexOf('')];break}}if(j===-1)for(let c of w){const v=c.map(i=>cells[i]);if(v.filter(x=>x==='X').length===sequenciaVitoria-1&&v.includes('')){j=c[v.indexOf('')];break}}if(j===-1&&tamanho===3&&cells[4]==='')j=4;if(j===-1){const l=cells.map((v,i)=>v===''?i:null).filter(v=>v!==null);j=l[Math.floor(Math.random()*l.length)]}}makeMove(j,true)}
-function melhorJogadaMinimax(){let m=-Infinity,mj=-1;const w=gerarWinConditions();for(let i=0;i<cells.length;i++)if(cells[i]===''){cells[i]='O';let s=minimax(cells,0,false,w);cells[i]='';if(s>m){m=s;mj=i}}return mj}
-function minimax(b,d,max,w){const v=checarVencedorMinimax(b,w);if(v==='O')return 10-d;if(v==='X')return d-10;if(!b.includes(''))return 0;if(max){let m=-Infinity;for(let i=0;i<b.length;i++)if(b[i]===''){b[i]='O';let s=minimax(b,d+1,false,w);b[i]='';m=Math.max(s,m)}return m}else{let m=Infinity;for(let i=0;i<b.length;i++)if(b[i]===''){b[i]='X';let s=minimax(b,d+1,true,w);b[i]='';m=Math.min(s,m)}return m}}
-function checarVencedorMinimax(b,w){for(let c of w){const p=b[c[0]];if(p&&c.every(i=>b[i]===p))return p}return null}
-function checkWinner(){const w=gerarWinConditions();for(let c of w){const p=cells[c[0]];if(p&&c.every(i=>cells[i]===p))return c}return null}
-function atualizarPlacar(){scoreX.textContent=placar.X;scoreO.textContent=placar.O;scoreVelha.textContent=placar.Velha}
-function resetRodada(){cells=Array(tamanho*tamanho).fill('');currentPlayer='X';gameActive=true;historico=[];pcPensando=false;atualizarStatus();renderBoard();if((modo==='pvb'||modo==='pvb-dificil')&&currentPlayer==='O'){pcPensando=true;setTimeout(()=>{jogadaPC();pcPensando=false},600)}}
-function zerarPlacar(){placar={X:0,O:0,Velha:0};atualizarPlacar();resetRodada()}
-atualizarLabels();renderBoard();
+let audioCtx = null;
+function iniciarAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+
+function tocarSom(tipo) {
+    iniciarAudio();
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const agora = audioCtx.currentTime;
+
+    if (tipo === 'clique') {
+        osc.frequency.setValueAtTime(400, agora);
+        gain.gain.setValueAtTime(0.1, agora);
+        osc.start(agora); osc.stop(agora + 0.08);
+    } else if (tipo === 'vitoria') {
+        osc.frequency.setValueAtTime(523.25, agora);
+        gain.gain.setValueAtTime(0.15, agora);
+        osc.start(agora); osc.stop(agora + 0.3);
+    } else if (tipo === 'empate') {
+        osc.frequency.setValueAtTime(200, agora);
+        gain.gain.setValueAtTime(0.15, agora);
+        osc.start(agora); osc.stop(agora + 0.2);
+    }
+}
+
+document.addEventListener('click', iniciarAudio, { once: true });
+
+const board = document.getElementById('board'),
+      status = document.getElementById('status'),
+      scoreX = document.getElementById('scoreX'),
+      scoreO = document.getElementById('scoreO'),
+      scoreVelha = document.getElementById('scoreVelha'),
+      labelX = document.getElementById('labelX'),
+      labelO = document.getElementById('labelO'),
+      nomeX = document.getElementById('nomeX'),
+      nomeO = document.getElementById('nomeO'),
+      simbX = document.getElementById('simbX'),
+      simbO = document.getElementById('simbO'),
+      elementoTempo = document.getElementById('tempo');
+
+let tamanho = 3, 
+    cells = Array(9).fill(''), 
+    currentPlayer = 'X', 
+    gameActive = true, 
+    modo = 'pvp', 
+    placar = {X: 0, O: 0, Velha: 0}, 
+    historico = [], 
+    sequenciaVitoria = 3, 
+    pcPensando = false;
+
+let tempoSegundos = 0;
+let intervaloCronometro = null;
+
+if(localStorage.getItem('velha_placar')) {
+    placar = JSON.parse(localStorage.getItem('velha_placar'));
+    nomeX.value = localStorage.getItem('velha_nomeX') || 'X';
+    nomeO.value = localStorage.getItem('velha_nomeO') || 'O';
+    simbX.value = localStorage.getItem('velha_simbX') || 'X';
+    simbO.value = localStorage.getItem('velha_simbO') || 'O';
+}
+
+function setTema(t) { document.documentElement.setAttribute('data-theme', t); }
+nomeX.oninput = nomeO.oninput = simbX.oninput = simbO.oninput = atualizarLabels;
+
+function iniciarCronometro() {
+    pararCronometro();
+    tempoSegundos = 0;
+    elementoTempo.textContent = '0s';
+    intervaloCronometro = setInterval(() => {
+        if (gameActive && !pcPensando) {
+            tempoSegundos++;
+            elementoTempo.textContent = tempoSegundos + 's';
+        }
+    }, 1000);
+}
+
+function pararCronometro() { if (intervaloCronometro) clearInterval(intervaloCronometro); }
+
+function atualizarLabels() {
+    let sX = simbX.value.trim() || 'X';
+    let sO = simbO.value.trim() || 'O';
+    labelX.textContent = `${nomeX.value || 'X'} (${sX})`;
+    labelO.textContent = `${nomeO.value || 'O'} (${sO})`;
+    localStorage.setItem('velha_nomeX', nomeX.value);
+    localStorage.setItem('velha_nomeO', nomeO.value);
+    localStorage.setItem('velha_simbX', sX);
+    localStorage.setItem('velha_simbO', sO);
+    atualizarStatus();
+    renderBoard();
+}
+
+function setTamanho(n) {
+    tamanho = n;
+    sequenciaVitoria = n === 3 ? 3 : 4;
+    cells = Array(n * n).fill('');
+    document.querySelectorAll('#tamanho button').forEach(b => b.classList.remove('ativo'));
+    document.getElementById('t' + n).classList.add('ativo');
+    resetRodada();
+}
+
+function gerarWinConditions() {
+    const c = [], s = tamanho, w = sequenciaVitoria;
+    for (let i = 0; i < s; i++) for (let j = 0; j <= s - w; j++) { const l = []; for (let k = 0; k < w; k++) l.push(i * s + j + k); c.push(l); }
+    for (let j = 0; j < s; j++) for (let i = 0; i <= s - w; i++) { const l = []; for (let k = 0; k < w; k++) l.push((i + k) * s + j); c.push(l); }
+    for (let i = 0; i <= s - w; i++) for (let j = 0; j <= s - w; j++) { const l = []; for (let k = 0; k < w; k++) l.push((i + k) * s + j + k); c.push(l); }
+    for (let i = 0; i <= s - w; i++) for (let j = w - 1; j < s; j++) { const l = []; for (let k = 0; k < w; k++) l.push((i + k) * s + j - k); c.push(l); }
+    return c;
+}
+
+function renderBoard(v = null) {
+    board.innerHTML = '';
+    board.style.gridTemplateColumns = `repeat(${tamanho}, 1fr)`;
+    
+    const fontSizeIdeal = tamanho === 3 ? '2rem' : tamanho === 4 ? '1.5rem' : '1.2rem';
+    
+    cells.forEach((val, i) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'cell-wrapper';
+        
+        const d = document.createElement('div');
+        d.className = 'cell';
+        d.style.fontSize = fontSizeIdeal;
+        
+        if (val) d.classList.add(val.toLowerCase());
+        if (v && v.includes(i)) d.classList.add('vencedora');
+        
+        if (val === 'X') d.textContent = simbX.value.trim() || 'X';
+        else if (val === 'O') d.textContent = simbO.value.trim() || 'O';
+        else d.textContent = '';
+
+        d.onclick = () => makeMove(i);
+        
+        wrapper.appendChild(d);
+        board.appendChild(wrapper);
+    });
+}
+
+function setModo(m) {
+    modo = m;
+    document.querySelectorAll('#controles button').forEach(b => b.classList.remove('ativo'));
+    document.getElementById(m).classList.add('ativo');
+    if (m !== 'pvp') { nomeO.value = 'PC'; nomeO.disabled = true; } 
+    else { if(nomeO.value === 'PC') nomeO.value = 'O'; nomeO.disabled = false; }
+    atualizarLabels();
+    resetRodada();
+}
+
+function makeMove(i, pc = false) {
+    if (cells[i] || !gameActive || pcPensando) return;
+    if (modo.startsWith('pvb') && currentPlayer === 'O' && !pc) return;
+    
+    historico.push([...cells]);
+    cells[i] = currentPlayer;
+    tocarSom('clique');
+    renderBoard();
+    
+    const v = checkWinner();
+    if (v) {
+        status.textContent = `${getNomeAtual()} venceu!`;
+        tocarSom('vitoria');
+        placar[currentPlayer]++;
+        gameActive = false;
+        pararCronometro();
+        renderBoard(v);
+        atualizarPlacar();
+        return;
+    }
+    if (!cells.includes('')) {
+        status.textContent = 'Deu velha!';
+        tocarSom('empate');
+        placar.Velha++;
+        gameActive = false;
+        pararCronometro();
+        atualizarPlacar();
+        return;
+    }
+    
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    atualizarStatus();
+    
+    if (modo.startsWith('pvb') && currentPlayer === 'O' && gameActive) {
+        pcPensando = true;
+        setTimeout(() => { jogadaPC(); pcPensando = false; }, 100);
+    }
+}
+
+function getNomeAtual() { return currentPlayer === 'X' ? (nomeX.value || 'X') : (nomeO.value || 'O'); }
+function atualizarStatus() { if (gameActive) status.textContent = `Vez do ${getNomeAtual()}`; }
+
+function desfazerJogada() {
+    if (historico.length === 0 || !gameActive) return;
+    cells = historico.pop();
+    if (modo.startsWith('pvb') && historico.length % 2 === 1) cells = historico.pop();
+    currentPlayer = 'X';
+    atualizarStatus();
+    renderBoard();
+}
+
+/* SISTEMA REFEITO E OTIMIZADO PARA NÃO TRAVAR */
+function jogadaPC() {
+    if (!gameActive) return;
+    let j = -1;
+    const w = gerarWinConditions();
+    
+    // 1. Modo Fácil: 100% Aleatório rápido
+    if (modo === 'pvb') {
+        const l = cells.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+        j = l[Math.floor(Math.random() * l.length)];
+    } 
+    // 2. Modo Médio: Ataca ou defende de forma direta, se não houver nada faz jogada aleatória
+    else if (modo === 'pvb-medio') {
+        for (let c of w) {
+            const v = c.map(i => cells[i]);
+            if (v.filter(x => x === 'O').length === sequenciaVitoria - 1 && v.includes('')) { j = c[v.indexOf('')]; break; }
+        }
+        if (j === -1) {
+            for (let c of w) {
+                const v = c.map(i => cells[i]);
+                if (v.filter(x => x === 'X').length === sequenciaVitoria - 1 && v.includes('')) { j = c[v.indexOf('')]; break; }
+            }
+        }
+        if (j === -1) {
+            const l = cells.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+            j = l[Math.floor(Math.random() * l.length)];
+        }
+    } 
+    // 3. Modo Difícil com Limite de Profundidade + Poda Alfa-Beta (Sem Travamentos)
+    else if (modo === 'pvb-dificil') {
+        let maxProfundidade = tamanho === 3 ? 9 : tamanho === 4 ? 4 : 3; 
+        j = melhorJogadaMinimax(maxProfundidade, w);
+    }
+    
+    if (j !== -1) makeMove(j, true);
+}
+
+function melhorJogadaMinimax(maxProf, w) {
+    let m = -Infinity, mj = -1;
+    for (let i = 0; i < cells.length; i++) if (cells[i] === '') {
+        cells[i] = 'O';
+        let s = minimax(cells, 0, -Infinity, Infinity, false, maxProf, w);
+        cells[i] = '';
+        if (s > m) { m = s; mj = i; }
+    }
+    return mj;
+}
+
+/* Algoritmo Minimax com Poda Alfa-Beta para performance ultra-rápida */
+function minimax(b, d, alfa, beta, max, maxProf, w) {
+    const v = checarVencedorMinimax(b, w);
+    if (v === 'O') return 10 - d;
+    if (v === 'X') return d - 10;
+    if (!b.includes('') || d >= maxProf) return 0;
+    
+    if (max) {
+        let m = -Infinity;
+        for (let i = 0; i < b.length; i++) if (b[i] === '') {
+            b[i] = 'O';
+            let s = minimax(b, d + 1, alfa, beta, false, maxProf, w);
+            b[i] = '';
+            m = Math.max(s, m);
+            alfa = Math.max(alfa, m);
+            if (beta <= alfa) break; // Poda Beta
+        }
+        return m;
+    } else {
+        let m = Infinity;
+        for (let i = 0; i < b.length; i++) if (b[i] === '') {
+            b[i] = 'X';
+            let s = minimax(b, d + 1, alfa, beta, true, maxProf, w);
+            b[i] = '';
+            m = Math.min(s, m);
+            beta = Math.min(beta, m);
+            if (beta <= alfa) break; // Poda Alfa
+        }
+        return m;
+    }
+}
+
+function checarVencedorMinimax(b, w) { for (let c of w) { const p = b[c[0]]; if (p && c.every(i => b[i] === p)) return p; } return null; }
+function checkWinner() { const w = gerarWinConditions(); for (let c of w) { const p = cells[c[0]]; if (p && c.every(i => cells[i] === p)) return c; } return null; }
+
+function atualizarPlacar() {
+    scoreX.textContent = placar.X; scoreO.textContent = placar.O; scoreVelha.textContent = placar.Velha;
+    localStorage.setItem('velha_placar', JSON.stringify(placar));
+}
+
+function resetRodada() {
+    cells = Array(tamanho * tamanho).fill('');
+    currentPlayer = 'X'; gameActive = true; historico = []; pcPensando = false;
+    atualizarStatus(); renderBoard(); iniciarCronometro();
+}
+
+function zerarPlacar() { placar = {X: 0, O: 0, Velha: 0}; atualizarPlacar(); resetRodada(); }
+
+atualizarLabels(); atualizarPlacar(); renderBoard(); iniciarCronometro();
 </script>
 </body>
 </html>
