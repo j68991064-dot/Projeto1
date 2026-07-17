@@ -1,0 +1,16 @@
+{
+  "name": "Jogo da Velha Pro Max",
+  "short_name": "VelhaProMax",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f0f1e",
+  "theme_color": "#58a6ff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1023/1023656.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
